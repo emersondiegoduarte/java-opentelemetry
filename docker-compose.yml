@@ -1,40 +1,70 @@
-#
-# Copyright The OpenZipkin Authors
-# SPDX-License-Identifier: Apache-2.0
-#
-
-# This file uses the version 2 docker compose file format, described here:
-# https://docs.docker.com/compose/compose-file/#version-2
-#
-# This runs the zipkin slim container, using docker-compose's default networking
-# to wire other containers together.
-#
-# Note that this file is meant for learning Zipkin, not production deployments.
-version: "3.6"
+version: '3'
 services:
-  # The zipkin process services the UI, and also exposes a POST endpoint that
-  # instrumentation can send trace data to.
-  zipkin:
-    image: ghcr.io/openzipkin/zipkin-slim:${TAG:-latest}
-    container_name: zipkin
-    # Environment settings are defined here https://github.com/openzipkin/zipkin/blob/master/zipkin-server/README.md#environment-variables
-    environment:
-      - STORAGE_TYPE=mem
-      # Uncomment to enable self-tracing
-      # - SELF_TRACING_ENABLED=true
-      # Uncomment to increase heap size
-      # - JAVA_OPTS=-Xms128m -Xmx128m -XX:+ExitOnOutOfMemoryError
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.82.0
+    restart: always
+    command:
+      - --config=/etc/otelcol-contrib/otel-collector.yml
+    volumes:
+      - ./docker/collector/otel-collector.yml:/etc/otelcol-contrib/otel-collector.yml
     ports:
-      # Port used for the Zipkin UI and HTTP Api
-      - 9411:9411
-    # Uncomment to enable debug logging
-    # command: --logging.level.zipkin2=DEBUG
-  jaeger:
+      - "1888:1888" # pprof extension
+      - "8888:8888" # Prometheus metrics exposed by the collector
+      - "8889:8889" # Prometheus exporter metrics
+      - "13133:13133" # health_check extension
+      - "4317:4317" # OTLP gRPC receiver
+      - "4318:4318" # OTLP http receiver
+      - "55679:55679" # zpages extension
+    depends_on:
+      - jaeger-all-in-one
+      - zipkin-all-in-one
+
+  prometheus:
+    container_name: prometheus
+    image: prom/prometheus
+    restart: always
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+    volumes:
+      - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+
+  loki:
+    image: grafana/loki:latest
+    command: -config.file=/etc/loki/local-config.yaml
+    ports:
+      - "3100:3100"
+
+  tempo:
+    image: grafana/tempo:latest
+    command: [ "-config.file=/etc/tempo.yml" ]
+    volumes:
+      - ./docker/tempo/tempo.yml:/etc/tempo.yml
+    ports:
+      - "3200:3200"   # tempo
+      - "4317"  # otlp grpc
+
+  grafana:
+    container_name: grafana
+    image: grafana/grafana
+    volumes:
+      - ./docker/grafana/grafana.yml:/etc/grafana/provisioning/datasources/grafana.yml
+    ports:
+      - "3000:3000"
+
+  # Jaeger
+  jaeger-all-in-one:
     image: jaegertracing/all-in-one:latest
-    container_name: jaeger
+    restart: always
     ports:
-      - "16686:16686" # the jaeger UI
-      - "14250" # the OpenTelemetry collector grpc
-      - "4318:4318"
-    environment:
-      - COLLECTOR_OTLP_ENABLED=true
+      - "16686:16686"
+      - "14268"
+      - "14250"
+
+  # Zipkin
+  zipkin-all-in-one:
+    image: openzipkin/zipkin:latest
+    restart: always
+    ports:
+      - "9411:9411"
