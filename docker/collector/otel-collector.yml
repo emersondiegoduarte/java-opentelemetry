@@ -11,6 +11,12 @@ exporters:
   logging:
     loglevel: debug
 
+  otlp/tempo:
+    endpoint: "http://tempo:4317"
+    tls:
+      insecure: true
+
+
   loki:
     endpoint: "http://loki:3100/loki/api/v1/push"
 
@@ -49,7 +55,7 @@ service:
     traces:
       receivers: [otlp]
       processors: [batch]
-      exporters: [jaeger,zipkin]
+      exporters: [jaeger,zipkin,otlp/tempo]
     logs:
       receivers: [otlp]
       exporters: [loki]

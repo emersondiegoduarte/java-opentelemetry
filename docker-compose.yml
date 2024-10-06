@@ -18,6 +18,7 @@ services:
     depends_on:
       - jaeger-all-in-one
       - zipkin-all-in-one
+      - tempo
 
   prometheus:
     container_name: prometheus
@@ -37,13 +38,15 @@ services:
       - "3100:3100"
 
   tempo:
+    container_name: tempo
     image: grafana/tempo:latest
     command: [ "-config.file=/etc/tempo.yml" ]
     volumes:
       - ./docker/tempo/tempo.yml:/etc/tempo.yml
+    restart: always
     ports:
-      - "3200:3200"   # tempo
       - "4317"  # otlp grpc
+      - "3200"
 
   grafana:
     container_name: grafana
@@ -52,7 +55,8 @@ services:
       - ./docker/grafana/grafana.yml:/etc/grafana/provisioning/datasources/grafana.yml
     ports:
       - "3000:3000"
-
+    depends_on:
+      - otel-collector
   # Jaeger
   jaeger-all-in-one:
     image: jaegertracing/all-in-one:latest
