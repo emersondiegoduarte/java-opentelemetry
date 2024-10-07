@@ -1,0 +1,4 @@
+common: &default_settings
+  license_key: ${NEW_RELIC_API_KEY}
+  app_name: 'java-opentelemetry'
+  log_level: info

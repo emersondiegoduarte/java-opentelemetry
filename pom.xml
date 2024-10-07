@@ -71,6 +71,15 @@
             <version>1.13.3</version>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/com.newrelic.agent.java/newrelic-agent -->
+        <dependency>
+            <groupId>com.newrelic.agent.java</groupId>
+            <artifactId>newrelic-agent</artifactId>
+            <version>8.15.0</version>
+        </dependency>
+
+
+
     </dependencies>
 
     <dependencyManagement>
