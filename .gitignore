@@ -34,3 +34,4 @@ build/
 
 
 docker/collector/otel-collector.yml
+/docker/collector/
