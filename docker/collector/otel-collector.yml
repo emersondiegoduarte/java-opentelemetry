@@ -37,7 +37,7 @@ exporters:
     tls:
       insecure: true
     headers:
-      api-key: "8eea0c70ab4407a8df505abcebd74958FFFFNRAL"
+      api-key: ${NEW_RELIC_API_KEY}
 
 
 # https://github.com/open-telemetry/opentelemetry-collector/blob/main/extension/README.md
