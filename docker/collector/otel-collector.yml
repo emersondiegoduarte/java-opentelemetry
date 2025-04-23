@@ -11,6 +11,20 @@ processors:
     send_batch_size: 512
     send_batch_max_size: 1024
 
+  # Will convert all monotonic, cumulative sums to monotonic, delta sums
+  cumulativetodelta:
+  transform:
+    trace_statements:
+      - context: span
+        statements:
+          - truncate_all(attributes, 4095)
+          - truncate_all(resource.attributes, 4095)
+    log_statements:
+      - context: log
+        statements:
+          - truncate_all(attributes, 4095)
+          - truncate_all(resource.attributes, 4095)
+
 
 exporters:
   logging:
@@ -33,11 +47,11 @@ exporters:
       label1: value1
 
   otlphttp:
-    endpoint: "https://otlp.nr-data.net:4318"
+    endpoint: "https://otlp.nr-data.net"
     tls:
       insecure: true
     headers:
-      api-key: ${NEW_RELIC_API_KEY}
+      api-key: "1539b3246cc883f63b41e41c9175ee40FFFFNRAL"
 
 
 # https://github.com/open-telemetry/opentelemetry-collector/blob/main/extension/README.md

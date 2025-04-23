@@ -1,7 +1,7 @@
 version: '3'
 services:
   otel-collector:
-    image: otel/opentelemetry-collector-contrib:0.98.0
+    image: otel/opentelemetry-collector-contrib:0.92.0
     restart: always
     command:
       - --config=/etc/otelcol-contrib/otel-collector.yml
@@ -9,7 +9,7 @@ services:
       - ./docker/collector/otel-collector.yml:/etc/otelcol-contrib/otel-collector.yml
     environment:
       LOG_EXPORTER_LOG_VERBOSITY: "detailed"
-      NEW_RELIC_API_KEY: "${NEW_RELIC_API_KEY}"
+      NEW_RELIC_API_KEY: "1539b3246cc883f63b41e41c9175ee40FFFFNRAL"
     ports:
       - "1888:1888" # pprof extension
       - "8888:8888" # Prometheus metrics exposed by the collector
@@ -35,6 +35,8 @@ services:
   loki:
     image: grafana/loki:latest
     command: -config.file=/etc/loki/local-config.yaml
+    volumes:
+      - ./docker/loki/loki-local-config.yml:/etc/loki/local-config.yaml
     ports:
       - "3100:3100"
 
