@@ -47,11 +47,11 @@ exporters:
       label1: value1
 
   otlphttp:
-    endpoint: "https://otlp.nr-data.net"
+    endpoint: "https://otlp.nr-data.net:4318"
     tls:
       insecure: true
     headers:
-      api-key: "1539b3246cc883f63b41e41c9175ee40FFFFNRAL"
+      api-key: ${NEW_RELIC_API_KEY}
 
 
 # https://github.com/open-telemetry/opentelemetry-collector/blob/main/extension/README.md
